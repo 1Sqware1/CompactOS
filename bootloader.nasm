@@ -1,15 +1,28 @@
-[org 0x7c00]
+MULTIBOOT_MAGIC equ 0x1BADB002
+MULTIBOOT_FLAGS equ 0x00
+MULTIBOOT_CHECKSUM equ -(MULTIBOOT_MAGIC + MULTIBOOT_FLAGS)
 
-mov ah, 0x0e
+section .multiboot
+align 4
+   dd MULTIBOOT_MAGIC
+   dd MULTIBOOT_FLAGS
+   dd MULTIBOOT_CHECKSUM
 
-mov al, 'H'
-int 0x10
+section .text
+global _start
+extern kernel_main
 
-mov al, "I"
-int 0x10
+_start:
+     cli
+     mov esp, stack_space
+     call kernel_main
 
-halt:
-   jmp halt
+.halt:
+     hlt
+     jmp .halt
 
-times 510 - ($ - $$) db 0
-dw 0xaa55
+section .bss
+resb 8192
+stack_space:
+
+; yes, AI help me withn this. I dont want learn NASM T_T
