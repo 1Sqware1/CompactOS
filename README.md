@@ -8,15 +8,23 @@ asm (bootloader), C (kernel), C++ (utilities).
 ## What is this for?
 for my portfolio and for fun (and to kill boredom). 👀
 
+## How to get Bin? (for qemu)
+**step 1:** clone this repo.
+
+**step 2:** run ```make```.
+
+**step 3:** ```qemu-system-i386 -kernel kernel.bin```.
+
+
 ## Roadmap
 
 - [x] Write Hello World on C kernel.
 - [x] Added Makefile.
 - [x] Added Simple Keyboard Driver. 
-- [ ] Connect the bootloader to GRUB (create .iso image).
-- [ ] Write first commands: `help`, `reboot`, `echo`, `info`.
+- [ ] Write first commands: `help`, `reboot`, `echo`, `info`. (10% done)
 - [ ] Write driver for FAT32.
 - [ ] Make text editor (like nano/vim).
+- [ ] Connect the bootloader to GRUB (create .iso image).
 - [ ] ??? (The roadmap will be updated).
 
 ## future plans for this project
