@@ -20,6 +20,25 @@ unsigned char keyboard_map[128] = {
 };
 
 
+int str_compare(const char *str1, const char *str2) {
+
+	while (*str1 && (*str1 == *str2)) {
+
+		str1++;
+		str2++;
+	}
+	return *(const unsigned char*)str1 - *(const unsigned char*)str2;
+}
+
+void clear_buffer(char *buf, int size) {
+
+	for (int i = 0; i < size; i++) {
+
+		buf[1] = 0;
+	}
+}
+
+
 void kernel_main(void) {
     char *video_memory = (char *) 0xB8000;
     
@@ -28,43 +47,86 @@ void kernel_main(void) {
         video_memory[i * 2 + 1] = 0x07;
     }
 
-    const char *welcome = "CompactOS v0.1.";
-    int i = 0;
-    while (welcome[i] != '\0') {
-        video_memory[i * 2] = welcome[i];
-        video_memory[i * 2 + 1] = 0x0A; 
-        i++;
+    char input_buffer[64];
+    clear_buffer(input_buffer, 64);
+    int buffer_idx = 0;
+
+    const char *prompt = "COS> ";
+    int cursor_pos = 0;
+    
+    int p = 0;
+    while (prompt[p] != '\0') {
+        video_memory[cursor_pos * 2] = prompt[p];
+        video_memory[cursor_pos * 2 + 1] = 0x0A; 
+	cursor_pos++;
+        p++;
     }
 
-    int cursor_pos = 80 * 2; 
     unsigned char last_scancode = 0;
 
     while (1) {
         if (inb(0x64) & 1) {
-            unsigned char scancode = inb(0x60); 
+            unsigned char scancode = inb(0x60);
 
             if (scancode < 0x80 && scancode != last_scancode) {
-                
-                unsigned char ascii = keyboard_map[scancode]; 
+                unsigned char ascii = keyboard_map[scancode];
 
-               if (ascii != 0) { 
-    
-    if (ascii == '\n') {
-        cursor_pos = ((cursor_pos / 80) + 1) * 80;
-    } 
-    else {
-        video_memory[cursor_pos * 2] = ascii;       
-        video_memory[cursor_pos * 2 + 1] = 0x0F;   
-        cursor_pos++;                              
-    }
+                if (ascii != 0) {
+                    
+                    if (ascii == '\n') {
+                        input_buffer[buffer_idx] = '\0'; 
 
-}
+                        cursor_pos = ((cursor_pos / 80) + 1) * 80;
 
-                
-                last_scancode = scancode; 
+                        if (str_compare(input_buffer, "info") == 0) {
+                            const char *info_msg = "CompactOS v0.1 - Made by 1Sqware1 for fun & portfolio.";
+                            int m = 0;
+                            while (info_msg[m] != '\0') {
+                                video_memory[cursor_pos * 2] = info_msg[m];
+                                video_memory[cursor_pos * 2 + 1] = 0x0E;
+                                cursor_pos++;
+                                m++;
+                            }
+                        } 
+                        else if (buffer_idx > 0) {
+                            const char *err_msg = "Unknown command. Try: info";
+                            int m = 0;
+                            while (err_msg[m] != '\0') {
+                                video_memory[cursor_pos * 2] = err_msg[m];
+                                video_memory[cursor_pos * 2 + 1] = 0x0C;
+                                cursor_pos++;
+                                m++;
+                            }
+                        }
+
+                        cursor_pos = ((cursor_pos / 80) + 1) * 80;
+
+                        clear_buffer(input_buffer, 64);
+                        buffer_idx = 0;
+
+                        p = 0;
+                        while (prompt[p] != '\0') {
+                            video_memory[cursor_pos * 2] = prompt[p];
+                            video_memory[cursor_pos * 2 + 1] = 0x0A;
+                            cursor_pos++;
+                            p++;
+                        }
+                    } 
+                    else {
+                        if (buffer_idx < 63) {
+                            input_buffer[buffer_idx] = ascii; 
+                            buffer_idx++;
+
+                            video_memory[cursor_pos * 2] = ascii; 
+                            video_memory[cursor_pos * 2 + 1] = 0x0F; 
+                            cursor_pos++;
+                        }
+                    }
+                }
+                last_scancode = scancode;
             } 
             else if (scancode >= 0x80) {
-                last_scancode = 0; 
+                last_scancode = 0;
             }
         }
     }
