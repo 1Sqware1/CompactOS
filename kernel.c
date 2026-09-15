@@ -39,6 +39,13 @@ void clear_buffer(char *buf, int size) {
 }
 
 
+void disable_hardware_cursor(void) {
+
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, 0x20);
+}
+
+
 void kernel_main(void) {
     char *video_memory = (char *) 0xB8000;
     
@@ -46,6 +53,8 @@ void kernel_main(void) {
         video_memory[i * 2] = ' ';
         video_memory[i * 2 + 1] = 0x07;
     }
+
+    disable_hardware_cursor();
 
     char input_buffer[64];
     clear_buffer(input_buffer, 64);
@@ -79,7 +88,7 @@ void kernel_main(void) {
                         cursor_pos = ((cursor_pos / 80) + 1) * 80;
 
                         if (str_compare(input_buffer, "info") == 0) {
-                            const char *info_msg = "CompactOS v0.1 - Made by 1Sqware1 for fun & portfolio.";
+                            const char *info_msg = "CompactOS v0.1 - Made by 1Sqware1.";
                             int m = 0;
                             while (info_msg[m] != '\0') {
                                 video_memory[cursor_pos * 2] = info_msg[m];
