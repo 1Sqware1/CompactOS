@@ -11,6 +11,7 @@ for my portfolio and for fun (and to kill boredom). 👀
 ## Roadmap
 
 - [x] Write Hello World on C kernel.
+- [x] Added Makefile. 
 - [ ] Connect the bootloader to GRUB (create .iso image).
 - [ ] Write first commands: `help`, `reboot`, `echo`, `info`.
 - [ ] Write driver for FAT32.
